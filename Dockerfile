@@ -1,6 +1,6 @@
 FROM php:8.1-apache
 
-# Install basic tools
+# Install semua dependensi dan ekstensi PHP dalam satu langkah
 RUN apt-get update && apt-get install -y \
     apt-utils \
     unzip \
@@ -18,17 +18,14 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libmariadb-dev-compat \
     libmariadb-dev \
+    libc-client-dev \
+    libkrb5-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install mysqli pdo pdo_mysql curl mbstring zip iconv openssl intl
-
-# Install IMAP secara terpisah (dengan dukungan Kerberos & SSL)
-RUN apt-get update && apt-get install -y libc-client-dev libkrb5-dev \
+    && docker-php-ext-install mysqli pdo pdo_mysql curl mbstring zip iconv openssl intl \
     && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
-    && docker-php-ext-install imap
-
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+    && docker-php-ext-install imap \
+    && a2enmod rewrite
 
 # Copy project files
 COPY . /var/www/html/
