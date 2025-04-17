@@ -1,27 +1,38 @@
-# Gunakan image PHP dengan Apache
+# Gunakan base image PHP + Apache
 FROM php:8.1-apache
 
-# Install ekstensi PHP yang dibutuhkan Perfex
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    zip \
     libonig-dev \
     libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libssl-dev \
+    libmariadb-dev \
+    libc-client-dev libkrb5-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install mysqli pdo pdo_mysql curl mbstring zip iconv openssl intl \
+    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
+    && docker-php-ext-install imap
 
-# Aktifkan rewrite module untuk Apache
+# Aktifkan mod_rewrite
 RUN a2enmod rewrite
 
-# Copy source code ke /var/www/html
-COPY ./crm /var/www/html/
+# Salin file project ke folder apache
+COPY . /var/www/html/
 
 # Set permission
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+RUN chown -R www-data:www-data /var/www/html/ \
+    && chmod -R 755 /var/www/html/
 
-# Ubah DocumentRoot ke /var/www/html (default Apache)
-WORKDIR /var/www/html
+# Set working directory
+WORKDIR /var/www/html/
