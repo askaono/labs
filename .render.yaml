@@ -2,7 +2,6 @@ services:
   - type: web
     name: perfex-crm
     env: docker
-    plan: free
     dockerfilePath: ./Dockerfile
-    autoDeploy: true
-    healthCheckPath: /
+    buildCommand: ""
+    startCommand: apache2-foreground
